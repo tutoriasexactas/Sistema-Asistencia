@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Test de Parseo DNI</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f4f4f9;
+      }
+      .box {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+      }
+      textarea {
+        width: 100%;
+        height: 80px;
+        padding: 8px;
+        margin-top: 5px;
+      }
+      button {
+        background: #ee8904;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-right: 5px;
+        margin-top: 10px;
+      }
+      button:hover {
+        background: #f65b18;
+      }
+      pre {
+        background: #272822;
+        color: #f8f8f2;
+        padding: 10px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h3>Prueba rápida de Parseo de DNI Argentino</h3>
+      <p>Haz clic en los botones de prueba o pega tu propia cadena:</p>
+
+      <button onclick="probarFormulario(textoViejo)">
+        Probar Formato Viejo (Papá)
+      </button>
+      <button onclick="probarFormulario(textoNuevo)">
+        Probar Formato Nuevo (Tarjeta)
+      </button>
+
+      <br /><br />
+      <label><b>Texto a parsear:</b></label>
+      <textarea id="inputText"></textarea>
+      <br />
+      <button onclick="ejecutarParseoManual()">
+        Probar texto personalizado
+      </button>
+    </div>
+
+    <div class="box">
+      <h3>Resultado:</h3>
+      <pre id="resultado">Haz una prueba...</pre>
+    </div>
+
+    <script>
+      // Datos de ejemplo que pasaste
+      const textoViejo =
+        "@21360572    @A@1@HURTADO@FABIO HECTOR@ARGENTINA@09/03/1970@M@15/03/2012@00100956272@7019 @15/03/2027@679@0@ILR:2.20 C:110927.01";
+      const textoNuevo =
+        "00667373508@LOPEZ GARCIA@MARCOS LAUTARO@M@46725519@A@13/05/2005@26/07/2021@204";
+
+      function probarFormulario(decodedText) {
+        document.getElementById("inputText").value = decodedText;
+        procesar(decodedText);
+      }
+
+      function ejecutarParseoManual() {
+        const texto = document.getElementById("inputText").value;
+        procesar(texto);
+      }
+
+      function procesar(decodedText) {
+        const partes = decodedText.split("@");
+
+        let dniExtraido = "";
+        let nombreExtraido = "";
+
+        // 1. Buscamos el DNI (número de 7 u 8 dígitos)
+        const posiblesDni = partes.find((p) => /^\d{7,8}$/.test(p.trim()));
+        if (posiblesDni) {
+          dniExtraido = posiblesDni.trim();
+        } else {
+          dniExtraido = decodedText.trim();
+        }
+
+        // 2. Extraer nombre y apellido de forma inteligente (filtrando números sueltos)
+        const textosFiltrados = partes
+          .map((p) => p.trim())
+          .filter(
+            (p) =>
+              p.length > 0 &&
+              !/^\d+$/.test(p) &&
+              !p.includes("HURTADO") &&
+              p !== "M" &&
+              p !== "F" &&
+              !p.includes("ARGENTINA") &&
+              !p.includes("/"),
+          );
+        // O de forma más directa buscando los textos de letras:
+
+        // Buscamos los bloques de texto que correspondan a nombres/apellidos (suelen estar en mayúsculas y sin números)
+        const palabrasTexto = partes.filter(
+          (p) =>
+            isNaN(p.trim()) &&
+            p.trim().length > 1 &&
+            !p.includes("/") &&
+            p !== "M" &&
+            p !== "F" &&
+            p !== "ARGENTINA",
+        );
+
+        if (palabrasTexto.length >= 2) {
+          // Generalmente los primeros textos largos son Apellido y Nombre
+          const apellido = palabrasTexto[0]?.trim() || "";
+          const nombres = palabrasTexto[1]?.trim() || "";
+          nombreExtraido = `${apellido} ${nombres}`.trim();
+        } else {
+          nombreExtraido = partes[1]?.trim() || "DESCONOCIDO";
+        }
+        // Mostrar el resultado en pantalla
+        document.getElementById("resultado").innerText = JSON.stringify(
+          {
+            DNI: dniExtraido,
+            "Nombre Completo": nombreExtraido,
+            "Partes totales del split": partes.length,
+          },
+          null,
+          2,
+        );
+      }
+    </script>
+  </body>
+</html>

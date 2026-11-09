@@ -42,39 +42,47 @@ export default function FormIngreso() {
           procesandoRef.current = true;
 
           // Parseo
+
           const partes = decodedText.split("@");
 
           let dniExtraido = "";
           let nombreExtraido = "";
 
-          // Busco en que parte está el DNI
+          //  Busco el DNI
           const posiblesDni = partes.find((p) => /^\d{7,8}$/.test(p.trim()));
           if (posiblesDni) {
             dniExtraido = posiblesDni.trim();
-          }
-
-          // extraigo nombre y apellido
-          if (partes.length >= 8) {
-            // Formato viejo
-            const apellido = partes[3]?.trim() || partes[1]?.trim() || "";
-            const nombres = partes[4]?.trim() || partes[2]?.trim() || "";
-            nombreExtraido = `${apellido} ${nombres}`.trim();
-          } else if (partes.length >= 5) {
-            // Formato nuevo
-            const apellido = partes[1]?.trim() || "";
-            const nombres = partes[2]?.trim() || "";
-            nombreExtraido = `${apellido} ${nombres}`.trim();
           } else {
             dniExtraido = decodedText.trim();
-            nombreExtraido = "DESCONOCIDO";
           }
+          // Extraigo nombre y apellido
+          const palabrasTexto = partes
+            .map((p) => p.trim())
+            .filter(
+              (p) =>
+                p.length > 1 &&
+                isNaN(p) && // No es un número puro
+                !/^\d{2}\/\d{2}\/\d{4}$/.test(p) && // No es una fecha (DD/MM/YYYY)
+                !p.includes("ARGENTINA") && // No es la nacionalidad
+                p !== "M" && // No es género M
+                p !== "F", // No es género F
+            );
+
+          if (palabrasTexto.length >= 2) {
+            const apellido = palabrasTexto[0];
+            const nombres = palabrasTexto[1];
+            nombreExtraido = `${apellido} ${nombres}`.trim();
+          } else {
+            nombreExtraido = partes[1]?.trim() || "DESCONOCIDO";
+          }
+
           // Actualizo los inputs
           setData({
             socioNombreApellido: nombreExtraido,
             socioDni: dniExtraido,
           });
 
-          // Cierro escáner de inmediato
+          // Cierro escáner
           try {
             if (scanner) {
               await scanner.clear();
