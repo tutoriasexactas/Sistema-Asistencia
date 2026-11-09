@@ -7,7 +7,7 @@ import { createClient } from "@/utils/supabase/client";
 import { descargarListadoAsistencias } from "@/lib/generarPdf";
 import { descargarListadoAsistenciasExcel } from "@/lib/generarExcel";
 
-export default function DescargaAsistencia({ usuario }) {
+export default function DescargaAsistencia() {
   const supabase = createClient();
 
   const [fechaSeleccionada, setFechaSeleccionada] = useState(
