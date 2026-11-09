@@ -61,13 +61,12 @@ export default function FormIngreso() {
             .filter(
               (p) =>
                 p.length > 1 &&
-                isNaN(p) && // No es un número puro
+                isNaN(Number(p)) && // Convertimos explícitamente a número para evitar el error de TS
                 !/^\d{2}\/\d{2}\/\d{4}$/.test(p) && // No es una fecha (DD/MM/YYYY)
                 !p.includes("ARGENTINA") && // No es la nacionalidad
                 p !== "M" && // No es género M
                 p !== "F", // No es género F
             );
-
           if (palabrasTexto.length >= 2) {
             const apellido = palabrasTexto[0];
             const nombres = palabrasTexto[1];
