@@ -5,7 +5,6 @@ import logoTutorias from "../../public/logo.png";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import Image from "next/image";
-import BuscarSocio from "@/components/sistemaIngreso/BuscarSocio";
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import Asistencia from "@/components/TomarAsistencia";
