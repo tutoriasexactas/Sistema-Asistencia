@@ -47,16 +47,28 @@ export default function FormIngreso() {
           let dniExtraido = "";
           let nombreExtraido = "";
 
-          if (partes.length >= 5) {
+          // Buscamos qué parte es el DNI (un número de 7 u 8 dígitos)
+          const posiblesDni = partes.find((p) => /^\d{7,8}$/.test(p.trim()));
+          if (posiblesDni) {
+            dniExtraido = posiblesDni.trim();
+          }
+
+          // Intentamos extraer nombres y apellidos según el formato
+          if (partes.length >= 8) {
+            // Formato viejo como el de tu papá: Apellido en pos 3 o 4, Nombre en la siguiente
+            const apellido = partes[3]?.trim() || partes[1]?.trim() || "";
+            const nombres = partes[4]?.trim() || partes[2]?.trim() || "";
+            nombreExtraido = `${apellido} ${nombres}`.trim();
+          } else if (partes.length >= 5) {
+            // Formato nuevo
             const apellido = partes[1]?.trim() || "";
             const nombres = partes[2]?.trim() || "";
             nombreExtraido = `${apellido} ${nombres}`.trim();
-
-            dniExtraido = partes[4]?.trim() || "";
           } else {
+            // Fallback si es un código genérico
             dniExtraido = decodedText.trim();
+            nombreExtraido = "DESCONOCIDO";
           }
-
           // Actualizo los inputs
           setData({
             socioNombreApellido: nombreExtraido,
